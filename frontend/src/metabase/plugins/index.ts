@@ -554,6 +554,7 @@ export const PLUGIN_EMBEDDING_IFRAME_SDK = {
   isInteractiveEmbeddingEnabled: (_state: State) => false,
   InteractiveEmbedRoute: (_props: SdkInteractiveEmbedRouteProps): ReactNode =>
     null,
+  additionalPublicReducerPlugins: {},
 };
 
 export const PLUGIN_CONTENT_VERIFICATION = {
