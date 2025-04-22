@@ -284,7 +284,8 @@
                                                 :values  ["sum"]}
                                                :column_settings
                                                {"[\"name\",\"sum\"]" {:number_style       "currency"
-                                                                      :currency_in_header false}}}
+                                                                      :currency_in_header false}}
+                                               :pivot.condense_duplicate_totals true}
                       :dataset_query          (mt/mbql-query products
                                                 {:aggregation [[:sum $price]]
                                                  :breakout    [$category
