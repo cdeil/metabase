@@ -949,6 +949,12 @@ See [fonts](../configuring-metabase/fonts.md).")
                     ;; frontend should set this value to `true` after the modal has been shown once
                     v))))
 
+(defsetting chart-generated
+  (deferred-tru "Whether a non-table chart has already been generated. Required for analytics to track instance activation journey.")
+  :visibility :public
+  :default    false
+  :type       :boolean)
+
 (defn- not-handling-api-request?
   []
   (nil? @api/*current-user*))
