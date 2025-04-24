@@ -32,9 +32,9 @@ import {
 import {
   isCoordinate,
   isCurrency,
-  isDate,
   isDateWithoutTime,
   isNumber,
+  isTemporal,
 } from "metabase-lib/v1/types/utils/isa";
 
 import { nestedSettings } from "./nested";
@@ -511,7 +511,7 @@ export function getSettingDefinitionsForColumn(series, column) {
       ? visualization.columnSettings(column)
       : visualization.columnSettings || {};
 
-  if (isDate(column) || (column.unit && column.unit !== "default")) {
+  if (isTemporal(column) || (column.unit && column.unit !== "default")) {
     return {
       ...extraColumnSettings,
       ...DATE_COLUMN_SETTINGS,

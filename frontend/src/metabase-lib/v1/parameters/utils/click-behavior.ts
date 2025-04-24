@@ -20,7 +20,7 @@ import { getParameterColumns } from "metabase-lib/v1/parameters/utils/targets";
 import type NativeQuery from "metabase-lib/v1/queries/NativeQuery";
 import type { ClickObjectDataRow } from "metabase-lib/v1/queries/drills/types";
 import { TYPE } from "metabase-lib/v1/types/constants";
-import { isDate, isa } from "metabase-lib/v1/types/utils/isa";
+import { isTemporal, isa } from "metabase-lib/v1/types/utils/isa";
 import type {
   ClickBehavior,
   ClickBehaviorDimensionTarget,
@@ -395,7 +395,7 @@ export function formatSourceForTarget(
   if (
     "column" in datum &&
     datum.column &&
-    isDate(datum.column) &&
+    isTemporal(datum.column) &&
     typeof datum.value === "string"
   ) {
     const sourceDateUnit = datum.column.unit || null;

@@ -1,6 +1,10 @@
 import * as Lib from "metabase-lib";
 import type Field from "metabase-lib/v1/metadata/Field";
-import { isDate, isID, isNumber } from "metabase-lib/v1/types/utils/isa";
+import {
+  isDateOrDateTime,
+  isID,
+  isNumber,
+} from "metabase-lib/v1/types/utils/isa";
 import type { DatasetColumn } from "metabase-types/api";
 
 import { DateTimeFingerprint } from "./DateTimeFingerprint";
@@ -26,7 +30,7 @@ export function TableColumnFingerprintInfo({
   field,
   showAllFieldValues,
 }: TableColumnFingerprintInfoProps) {
-  if (isDate(field)) {
+  if (isDateOrDateTime(field)) {
     return (
       <DateTimeFingerprint
         className={className}

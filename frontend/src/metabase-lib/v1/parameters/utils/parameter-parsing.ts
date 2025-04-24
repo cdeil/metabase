@@ -91,7 +91,7 @@ function parseParameterValueForFields(
   fields: Field[],
 ): ParameterValueOrArray {
   // unix dates fields are numeric but query params shouldn't be parsed as numbers
-  if (fields.every((f) => f.isNumeric() && !f.isDate())) {
+  if (fields.every((f) => f.isNumeric() && !f.isTemporal())) {
     return normalizeNumberParameterValue(value);
   }
 

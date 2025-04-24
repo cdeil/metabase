@@ -18,7 +18,7 @@ type ColumnInfo = {
   isString: boolean;
   isNumeric: boolean;
   isBoolean: boolean;
-  isTemporal: boolean;
+  isDateOrDateTime: boolean;
   isID: boolean;
   isLocation: boolean;
   isTemporalBucketable: boolean;
@@ -31,7 +31,7 @@ function isParameterCompatibleWithColumn(
     isString,
     isNumeric,
     isBoolean,
-    isTemporal,
+    isDateOrDateTime,
     isID,
     isLocation,
     isTemporalBucketable,
@@ -41,7 +41,7 @@ function isParameterCompatibleWithColumn(
   const type = getParameterType(parameter);
   switch (type) {
     case "date":
-      return isTemporal;
+      return isDateOrDateTime;
     case "id":
       return isID;
     case "category":
@@ -69,7 +69,7 @@ export function fieldFilterForParameter(
       isString: field.isString(),
       isNumeric: field.isNumeric(),
       isBoolean: field.isBoolean(),
-      isTemporal: field.isDate(),
+      isDateOrDateTime: field.isDateOrDateTime(),
       isID: field.isID(),
       isLocation: field.isLocation(),
       isTemporalBucketable: false,
@@ -87,7 +87,7 @@ export function columnFilterForParameter(
       isString: Lib.isStringOrStringLike(column),
       isNumeric: Lib.isNumeric(column),
       isBoolean: Lib.isBoolean(column),
-      isTemporal: Lib.isTemporal(column),
+      isDateOrDateTime: Lib.isDateOrDateTime(column),
       isID: Lib.isID(column),
       isLocation: Lib.isLocation(column),
       isTemporalBucketable: Lib.isTemporalBucketable(query, stageIndex, column),

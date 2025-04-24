@@ -99,7 +99,7 @@ export function getFieldType(field) {
   }
 }
 
-export const isDate = isFieldType.bind(null, TEMPORAL);
+export const isTemporal = isFieldType.bind(null, TEMPORAL);
 export const isNumeric = isFieldType.bind(null, NUMBER);
 export const isInteger = isFieldType.bind(null, INTEGER);
 export const isBoolean = isFieldType.bind(null, BOOLEAN);
@@ -135,15 +135,20 @@ export const isNumericBaseType = (field) => {
   }
 };
 
+export const isDateOrDateTime = (field) => {
+  if (!field) {
+    return false;
+  }
+  const effectiveType = field.effective_type ?? field.base_type;
+  return isa(effectiveType, TYPE.Date) || isa(effectiveType, TYPE.DateTime);
+};
+
 export const isDateWithoutTime = (field) => {
   if (!field) {
     return false;
   }
-  if (field.effective_type) {
-    return isa(field.effective_type, TYPE.Date);
-  } else {
-    return isa(field.base_type, TYPE.Date);
-  }
+  const effectiveType = field.effective_type ?? field.base_type;
+  return isa(effectiveType, TYPE.Date);
 };
 
 // ZipCode, ID, etc derive from Number but should not be formatted as numbers

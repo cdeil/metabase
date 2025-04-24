@@ -6,7 +6,7 @@ import { formatNumber } from "metabase/lib/formatting/numbers";
 import { measureText } from "metabase/lib/measure-text";
 import { uuid } from "metabase/lib/uuid";
 import { isEmpty } from "metabase/lib/validate";
-import { isDate, isNumeric } from "metabase-lib/v1/types/utils/isa";
+import { isNumeric, isTemporal } from "metabase-lib/v1/types/utils/isa";
 import type {
   DateTimeAbsoluteUnit,
   SmartScalarComparison,
@@ -295,7 +295,7 @@ function getMaxPeriodsAgo({
   rows,
   dateUnit,
 }: getMaxPeriodsAgoParameters) {
-  const dimensionIndex = cols.findIndex((col) => isDate(col));
+  const dimensionIndex = cols.findIndex((col) => isTemporal(col));
 
   if (dimensionIndex === -1) {
     return null;

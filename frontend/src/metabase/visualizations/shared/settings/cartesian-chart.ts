@@ -19,10 +19,10 @@ import type { ComputedVisualizationSettings } from "metabase/visualizations/type
 import { getColumnKey } from "metabase-lib/v1/queries/utils/column-key";
 import {
   isAny,
-  isDate,
   isDimension,
   isMetric,
   isNumeric,
+  isTemporal,
 } from "metabase-lib/v1/types/utils/isa";
 import type {
   Card,
@@ -296,7 +296,7 @@ export const getAvailableXAxisScales = (
     options.push({ name: t`Linear`, value: "linear" });
 
     // For relative date units such as day of week we do not want to show log, pow, histogram scales
-    if (!isDate(dimensionColumn)) {
+    if (!isTemporal(dimensionColumn)) {
       if (!settings["graph.x_axis._is_histogram"]) {
         options.push({ name: t`Power`, value: "pow" });
         options.push({ name: t`Log`, value: "log" });

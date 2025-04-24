@@ -4,7 +4,7 @@ import {
   getUrlProtocol,
   isDefaultLinkProtocol,
 } from "metabase/lib/formatting";
-import { isDate } from "metabase-lib/v1/types/utils/isa";
+import { isTemporal } from "metabase-lib/v1/types/utils/isa";
 import type { ParameterValueOrArray } from "metabase-types/api";
 import type { DatasetColumn, RowValue } from "metabase-types/api/dataset";
 
@@ -28,7 +28,7 @@ export interface ValueAndColumnForColumnNameDate {
 }
 
 function formatValueForLinkTemplate(value: Value, column: DatasetColumn) {
-  if (isDate(column) && column.unit && typeof value === "string") {
+  if (isTemporal(column) && column.unit && typeof value === "string") {
     return formatDateTimeForParameter(value, column.unit);
   }
   return value;

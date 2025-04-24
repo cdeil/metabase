@@ -14,7 +14,7 @@ import {
   isBoolean,
   isCoordinate,
   isCurrency,
-  isDate,
+  isDateOrDateTime,
   isDateWithoutTime,
   isDimension,
   isFK,
@@ -26,6 +26,7 @@ import {
   isString,
   isStringLike,
   isSummable,
+  isTemporal,
   isTime,
   isTypeFK,
   isa,
@@ -157,8 +158,12 @@ export default class Field extends Base {
     return stripId(this.displayName());
   }
 
-  isDate() {
-    return isDate(this);
+  isTemporal() {
+    return isTemporal(this);
+  }
+
+  isDateOrDateTime() {
+    return isDateOrDateTime(this);
   }
 
   isDateWithoutTime() {

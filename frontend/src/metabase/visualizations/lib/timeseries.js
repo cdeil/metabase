@@ -1,6 +1,6 @@
 import moment from "moment-timezone"; // eslint-disable-line no-restricted-imports -- deprecated usage
 
-import { isDate } from "metabase-lib/v1/types/utils/isa";
+import { isTemporal } from "metabase-lib/v1/types/utils/isa";
 
 const TIMESERIES_UNITS = new Set([
   "minute",
@@ -42,7 +42,7 @@ export function dimensionIsTimeseries({ cols, rows }, i = 0) {
 
 export function dimensionIsExplicitTimeseries({ cols }, i) {
   return (
-    isDate(cols[i]) &&
+    isTemporal(cols[i]) &&
     (cols[i].unit == null || TIMESERIES_UNITS.has(cols[i].unit))
   );
 }

@@ -15,9 +15,9 @@ import {
 } from "metabase-lib/v1/types/constants";
 import {
   isBoolean,
-  isDate,
   isLongitude,
   isNumeric,
+  isTemporal,
 } from "metabase-lib/v1/types/utils/isa";
 
 function freeformArgument(field, table) {
@@ -33,7 +33,7 @@ function numberArgument(field, table) {
 }
 
 function comparableArgument(field, table) {
-  if (isDate(field)) {
+  if (isTemporal(field)) {
     return {
       type: "date",
     };
@@ -62,7 +62,7 @@ function equivalentArgument(field, table) {
     };
   }
 
-  if (isDate(field)) {
+  if (isTemporal(field)) {
     return {
       type: "date",
     };

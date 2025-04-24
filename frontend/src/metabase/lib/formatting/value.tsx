@@ -19,9 +19,9 @@ import { rangeForValue } from "metabase-lib/v1/queries/utils/range-for-value";
 import {
   isBoolean,
   isCoordinate,
-  isDate,
   isEmail,
   isNumber,
+  isTemporal,
   isTime,
   isURL,
 } from "metabase-lib/v1/types/utils/isa";
@@ -190,7 +190,7 @@ export function formatValueRaw(
       options,
     );
   } else if (
-    isDate(column) ||
+    isTemporal(column) ||
     moment.isDate(value) ||
     moment.isMoment(value) ||
     moment(value as string, ["YYYY-MM-DD'T'HH:mm:ss.SSSZ"], true).isValid()

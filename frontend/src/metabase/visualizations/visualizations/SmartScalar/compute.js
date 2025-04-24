@@ -9,7 +9,7 @@ import { computeChange } from "metabase/visualizations/lib/numeric";
 import { COMPARISON_TYPES } from "metabase/visualizations/visualizations/SmartScalar/constants";
 import { formatChange } from "metabase/visualizations/visualizations/SmartScalar/utils";
 import * as Lib from "metabase-lib";
-import { isDate } from "metabase-lib/v1/types/utils/isa";
+import { isTemporal } from "metabase-lib/v1/types/utils/isa";
 import { isAbsoluteDateTimeUnit } from "metabase-types/guards/date-time";
 
 export function computeTrend(series, insights, settings, { getColor }) {
@@ -155,7 +155,7 @@ function getCurrentMetricData({ series, insights, settings }) {
 
   // column locations for date and metric
   const dimensionColIndex = cols.findIndex((col) => {
-    return isDate(col) || isAbsoluteDateTimeUnit(col.unit);
+    return isTemporal(col) || isAbsoluteDateTimeUnit(col.unit);
   });
   const metricColIndex = cols.findIndex(
     (col) => col.name === settings["scalar.field"],

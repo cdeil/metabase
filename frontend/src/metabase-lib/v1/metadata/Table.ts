@@ -87,7 +87,7 @@ class Table {
   }
 
   dateFields() {
-    return this.getFields().filter((field) => field.isDate());
+    return this.getFields().filter((field) => field.isTemporal());
   }
 
   // FIELDS

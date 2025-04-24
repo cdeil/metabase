@@ -83,7 +83,7 @@ export const getInputType = (param: Parameter, field?: Field) => {
   if (field.isTime()) {
     return "time";
   }
-  if (field.isDate()) {
+  if (field.isDateOrDateTime()) {
     return field.isDateWithoutTime() ? "date" : "datetime";
   }
   if (

@@ -11,7 +11,7 @@ import {
   getDataFromClicked,
   getTargetForQueryParams,
 } from "metabase-lib/v1/parameters/utils/click-behavior";
-import { isDate } from "metabase-lib/v1/types/utils/isa";
+import { isTemporal } from "metabase-lib/v1/types/utils/isa";
 import * as ML_Urls from "metabase-lib/v1/urls";
 
 export function getDashboardDrillType(clicked) {
@@ -221,7 +221,7 @@ function getTypeForSource(source, data, extraData) {
   }
 
   const datum = data[source.type][source.id.toLowerCase()] || [];
-  if (datum.column && isDate(datum.column)) {
+  if (datum.column && isTemporal(datum.column)) {
     return "date";
   }
 
