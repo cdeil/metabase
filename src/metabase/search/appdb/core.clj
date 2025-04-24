@@ -18,6 +18,7 @@
    [metabase.search.ingestion :as search.ingestion]
    [metabase.search.permissions :as search.permissions]
    [metabase.util :as u]
+   [metabase.util.cluster-lock :as cluster-lock]
    [metabase.util.json :as json]
    [metabase.util.log :as log]
    [toucan2.core :as t2])
