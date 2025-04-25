@@ -11557,6 +11557,15 @@ databaseChangeLog:
 #                  name: user_id
 #              - column:
 #                  name: undone
+  - changeSet:
+      id: v55.2025-04-25T13:09:23
+      author: wotbrew
+      comment: Drop model_id requirement for actions
+      changes:
+        - dropNotNullConstraint:
+            tableName: action
+            columnDataType: int
+            columnName: model_id
 
 
   # >>>>>>>>>> DO NOT ADD NEW MIGRATIONS BELOW THIS LINE! ADD THEM ABOVE <<<<<<<<<<
