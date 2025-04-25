@@ -19,6 +19,7 @@ import type { Dataset, DatasetColumn } from "metabase-types/api";
 import type {
   VisualizerColumnReference,
   VisualizerDataSource,
+  VisualizerEntity,
   VisualizerHistoryItem,
 } from "metabase-types/store/visualizer";
 
@@ -207,7 +208,7 @@ export function removeColumnFromFunnel(
   ]);
 }
 
-function createMetricColumn(
+export function createMetricColumn(
   name: string,
   type = "type/Integer",
 ): DatasetColumn {
@@ -221,7 +222,7 @@ function createMetricColumn(
   };
 }
 
-function createDimensionColumn(name: string): DatasetColumn {
+export function createDimensionColumn(name: string): DatasetColumn {
   return {
     name,
     display_name: name,
@@ -233,7 +234,7 @@ function createDimensionColumn(name: string): DatasetColumn {
 }
 
 export function isScalarFunnel(
-  state: Pick<VisualizerHistoryItem, "display" | "settings">,
+  state: Pick<VisualizerEntity, "display" | "settings">,
 ) {
   return (
     state.display === "funnel" &&

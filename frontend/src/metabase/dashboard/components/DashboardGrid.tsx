@@ -46,7 +46,10 @@ import {
   isRecentCollectionItem,
 } from "metabase-types/api";
 import type { State } from "metabase-types/store";
-import type { VisualizerHistoryItem } from "metabase-types/store/visualizer";
+import type {
+  VisualizerEntity,
+  VisualizerHistoryItem,
+} from "metabase-types/store/visualizer";
 
 import type { SetDashCardAttributesOpts } from "../actions";
 import {
@@ -558,7 +561,7 @@ class DashboardGridInner extends Component<
     );
   }
 
-  onVisualizerModalSave = (visualization: VisualizerHistoryItem) => {
+  onVisualizerModalSave = (visualization: VisualizerEntity) => {
     const { visualizerModalStatus } = this.state;
 
     if (!visualizerModalStatus) {

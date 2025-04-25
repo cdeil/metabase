@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { t } from "ttag";
+import _ from "underscore";
 
 import EditableText from "metabase/core/components/EditableText";
 import { useDispatch, useSelector } from "metabase/lib/redux";
@@ -15,12 +16,12 @@ import {
   setTitle,
   toggleDataSideBar,
 } from "metabase/visualizer/visualizer.slice";
-import type { VisualizerHistoryItem } from "metabase-types/store/visualizer";
+import type { VisualizerEntity } from "metabase-types/store/visualizer";
 
 import S from "./Header.module.css";
 
 interface HeaderProps {
-  onSave: (visualization: VisualizerHistoryItem) => void;
+  onSave: (visualization: VisualizerEntity) => void;
   onClose: () => void;
   saveLabel?: string;
   allowSaveWhenPristine?: boolean;
@@ -45,7 +46,9 @@ export function Header({
   const dispatch = useDispatch();
 
   const handleSave = () => {
-    onSave(visualizerState);
+    onSave(
+      _.pick(visualizerState, ["display", "columnValuesMapping", "settings"]),
+    );
   };
 
   const handleChangeTitle = useCallback(

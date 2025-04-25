@@ -51,11 +51,14 @@ export type VisualizerColumnValueSource =
   | VisualizerColumnReference
   | VisualizerDataSourceNameReference;
 
-export type VisualizerHistoryItem = {
+export type VisualizerEntity = {
   display: VisualizationDisplay | null;
-  columns: DatasetColumn[];
   columnValuesMapping: Record<string, VisualizerColumnValueSource[]>;
   settings: VisualizationSettings;
+};
+
+export type VisualizerHistoryItem = VisualizerEntity & {
+  columns: DatasetColumn[];
 };
 
 export type VisualizerCommonState = {
