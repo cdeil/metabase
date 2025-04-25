@@ -30,7 +30,7 @@ export function useSdkIframeEmbedEventBus() {
           setAuthConfig(data);
         })
         .with({ type: "metabase.embed.setSettings" }, ({ data }) => {
-          setSettings(data);
+          setSettings((settings) => ({ ...settings, ...data }));
         });
     };
 
