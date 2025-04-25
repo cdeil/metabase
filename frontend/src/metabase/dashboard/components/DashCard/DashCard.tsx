@@ -25,22 +25,28 @@ import { getVisualizationRaw } from "metabase/visualizations";
 import { extendCardWithDashcardSettings } from "metabase/visualizations/lib/settings/typed-utils";
 import type { ClickActionModeGetter } from "metabase/visualizations/types";
 import {
+  createDataSource,
   getInitialStateForCardDataSource,
   isVisualizerDashboardCard,
   isVisualizerSupportedVisualization,
 } from "metabase/visualizer/utils";
 import { getInitialStateForMultipleSeries } from "metabase/visualizer/utils/get-initial-state-for-multiple-series";
+import { getVisualizationColumns } from "metabase/visualizer/utils/get-visualization-columns";
 import type {
   Card,
   CardId,
   DashCardId,
   Dashboard,
   DashboardCard,
+  Dataset,
   VirtualCard,
   VisualizationSettings,
 } from "metabase-types/api";
 import type { StoreDashcard } from "metabase-types/store";
-import type { VisualizerHistoryItem } from "metabase-types/store/visualizer";
+import type {
+  VisualizerDataSourceId,
+  VisualizerHistoryItem,
+} from "metabase-types/store/visualizer";
 
 import S from "./DashCard.module.css";
 import { DashCardActionsPanel } from "./DashCardActionsPanel/DashCardActionsPanel";
@@ -315,6 +321,7 @@ function DashCardInner({
       [dashcard, navigateToNewCardFromDashboard],
     );
 
+  const datasets = useSelector((state) => getDashcardData(state, dashcard.id));
   const onEditVisualizationClick = useMemo(() => {
     if (
       !isVisualizerDashboardCard(dashcard) &&
@@ -327,8 +334,35 @@ function DashCardInner({
       let initialState: Partial<VisualizerHistoryItem>;
 
       if (isVisualizerDashboardCard(dashcard)) {
-        initialState = dashcard.visualization_settings
-          ?.visualization as Partial<VisualizerHistoryItem>;
+        const visualizationEntity =
+          dashcard.visualization_settings?.visualization;
+
+        const cards = [dashcard.card];
+        if (Array.isArray(dashcard.series)) {
+          cards.push(...dashcard.series);
+        }
+
+        const dataSources = cards.map((card) =>
+          createDataSource("card", card.id, card.name),
+        );
+
+        const dataSourceDatasets: Record<
+          VisualizerDataSourceId,
+          Dataset | null | undefined
+        > = Object.fromEntries(
+          Object.entries(datasets ?? {}).map(([cardId, dataset]) => [
+            `card:${cardId}`,
+            dataset,
+          ]),
+        );
+
+        const columns = getVisualizationColumns(
+          visualizationEntity,
+          dataSourceDatasets,
+          dataSources,
+        );
+
+        initialState = { ...visualizationEntity, columns };
       } else if (series.length > 1) {
         initialState = getInitialStateForMultipleSeries(series);
       } else {
@@ -340,7 +374,7 @@ function DashCardInner({
 
       onEditVisualization?.(dashcard, initialState);
     };
-  }, [dashcard, series, onEditVisualization]);
+  }, [dashcard, series, onEditVisualization, datasets]);
 
   return (
     <ErrorBoundary>
