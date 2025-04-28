@@ -99,6 +99,8 @@ export const PublicOrEmbeddedDashboard = ({
   onLoad,
   onLoadWithoutCards,
   cardTitled,
+  withFooter,
+  onError,
 }: Pick<
   DashboardContextProps,
   | "dashboardId"
@@ -121,6 +123,7 @@ export const PublicOrEmbeddedDashboard = ({
   | "onLoadWithoutCards"
   | "cardTitled"
   | "withFooter"
+  | "onError"
 > &
   Pick<EmbeddingAdditionalHashOptions, "locale">) => (
   <DashboardContextProvider
@@ -144,6 +147,7 @@ export const PublicOrEmbeddedDashboard = ({
     onLoadWithoutCards={onLoadWithoutCards}
     cardTitled={cardTitled}
     withFooter={withFooter}
+    onError={onError}
   >
     <PublicOrEmbeddedDashboardInner locale={locale} />
   </DashboardContextProvider>
