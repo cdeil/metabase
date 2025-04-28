@@ -33,6 +33,8 @@ import {
   setParameterSourceType,
   setParameterTemporalUnits,
   setParameterType,
+  setParameterValue,
+  setParameterValueToDefault,
   setSharing,
   setSidebar,
   showAddParameterPopover,
@@ -40,8 +42,6 @@ import {
   updateDashboardAndCards,
 } from "metabase/dashboard/actions";
 import { connect } from "metabase/lib/redux";
-import { closeNavbar, setErrorPage } from "metabase/redux/app";
-import { getIsNavbarOpen } from "metabase/selectors/app";
 import {
   canManageSubscriptions,
   getUserIsAdmin,
@@ -52,6 +52,7 @@ import {
   getClickBehaviorSidebarDashcard,
   getDashboardBeforeEditing,
   getDashboardComplete,
+  getDraftParameterValues,
   getIsAddParameterPopoverOpen,
   getIsAdditionalInfoVisible,
   getIsDashCardsLoadingComplete,
@@ -64,15 +65,16 @@ import {
   getIsSharing,
   getLoadingStartTime,
   getParameterValues,
+  getParameters,
   getSelectedTabId,
   getSidebar,
   getSlowCards,
+  getTabs,
 } from "../selectors";
 
 const mapStateToProps = (state: State) => ({
   canManageSubscriptions: canManageSubscriptions(state),
   isAdmin: getUserIsAdmin(state),
-  isNavbarOpen: getIsNavbarOpen(state),
   isEditing: getIsEditing(state),
   isSharing: getIsSharing(state),
   dashboardBeforeEditing: getDashboardBeforeEditing(state),
@@ -80,7 +82,10 @@ const mapStateToProps = (state: State) => ({
   isDirty: getIsDirty(state),
   dashboard: getDashboardComplete(state),
   slowCards: getSlowCards(state),
+  parameters: getParameters(state),
   parameterValues: getParameterValues(state),
+  draftParameterValues: getDraftParameterValues(state),
+  tabs: getTabs(state),
   loadingStartTime: getLoadingStartTime(state),
   clickBehaviorSidebarDashcard: getClickBehaviorSidebarDashcard(state),
   isAddParameterPopoverOpen: getIsAddParameterPopoverOpen(state),
@@ -105,10 +110,11 @@ const mapDispatchToProps = {
   setSharing,
   toggleSidebar,
   closeSidebar,
-  closeNavbar,
-  setErrorPage,
   setParameterName,
   setParameterType,
+  setParameterValue,
+  setParameterValueToDefault,
+  navigateToNewCardFromDashboard,
   setParameterDefaultValue,
   setParameterRequired,
   setParameterTemporalUnits,

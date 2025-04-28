@@ -9,12 +9,19 @@ import {
 import { usePrevious, useUnmount } from "react-use";
 import { isEqual, isObject, noop } from "underscore";
 
-import { useDispatch } from "metabase/lib/redux";
+import { useDispatch, useSelector } from "metabase/lib/redux";
+import type {
+  DisplayTheme,
+  EmbedResourceDownloadOptions,
+} from "metabase/public/lib/types";
+import { getErrorPage } from "metabase/selectors/app";
+import type { ClickActionModeGetter } from "metabase/visualizations/types";
 import type { DashboardId } from "metabase-types/api";
 
 import { navigateToNewCardFromDashboard } from "../actions";
 import type { NavigateToNewCardFromDashboardOpts } from "../components/DashCard/types";
 import type { UseAutoScrollToDashcardResult } from "../hooks/use-auto-scroll-to-dashcard";
+import { getIsLoadingWithoutCards } from "../selectors";
 import type {
   DashboardFullscreenControls,
   DashboardRefreshPeriodControls,
@@ -35,6 +42,7 @@ type OwnProps = {
   dashboardId: DashboardId;
   parameterQueryParams?: Record<string, string>;
   onLoad?: (result: SuccessfulFetchDashboardResult) => void;
+  onLoadWithoutCards?: (result: SuccessfulFetchDashboardResult) => void;
   onError?: (result: FailedFetchDashboardResult) => void;
   navigateToNewCardFromDashboard?: (
     opts: NavigateToNewCardFromDashboardOpts,
@@ -51,7 +59,9 @@ type DashboardControls = DashboardFullscreenControls &
   EmbedDisplayParams &
   EmbedThemeControls;
 
-type ContextProps = OwnProps & ReduxProps & Partial<DashboardControls>;
+export type DashboardContextProps = OwnProps & Partial<DashboardControls>;
+
+type ContextProps = DashboardContextProps & ReduxProps;
 
 type ContextReturned = OwnResult &
   OwnProps &
@@ -65,6 +75,7 @@ const DashboardContextProviderInner = ({
   dashboardId,
   parameterQueryParams = {},
   onLoad,
+  onLoadWithoutCards,
   onError,
 
   children,
@@ -91,6 +102,9 @@ const DashboardContextProviderInner = ({
   cardTitled = true,
   getClickActionMode = undefined,
   withFooter = true,
+
+  // click actions
+  getClickActionMode,
 
   // redux selectors
   dashboard,
@@ -151,6 +165,27 @@ const DashboardContextProviderInner = ({
       parameterQueryParams,
     ],
   );
+
+  const isLoadingWithoutCards = useSelector(getIsLoadingWithoutCards);
+  const isErrorPage = useSelector(getErrorPage);
+
+  const previousIsLoadingWithoutCards = usePrevious(isLoadingWithoutCards);
+
+  useEffect(() => {
+    if (
+      !isLoadingWithoutCards &&
+      previousIsLoadingWithoutCards &&
+      !isErrorPage
+    ) {
+      onLoadWithoutCards?.(dashboard);
+    }
+  }, [
+    isLoadingWithoutCards,
+    isErrorPage,
+    previousIsLoadingWithoutCards,
+    dashboard,
+    onLoadWithoutCards,
+  ]);
 
   useEffect(() => {
     const hasDashboardChanged = dashboardId !== previousDashboardId;
