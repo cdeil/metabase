@@ -78,27 +78,35 @@ export const AutomaticDashboardAppInner = ({
   const hasSidebar = related && Object.keys(related).length > 0;
 
   const save = async () => {
-    // remove the transient id before trying to save
-    const { data: newDashboard } = await saveDashboard(dissoc(dashboard, "id"));
-    invalidateCollections();
-    dispatch(
-      addUndo({
-        message: (
-          <div className={cx(CS.flex, CS.alignCenter)}>
-            {t`Your dashboard was saved`}
-            <Link
-              className={cx(CS.link, CS.textBold, CS.ml1)}
-              to={Urls.dashboard(newDashboard)}
-            >
-              {t`See it`}
-            </Link>
-          </div>
-        ),
-        icon: "dashboard",
-      }),
-    );
+    if (dashboard) {
+      // remove the transient id before trying to save
+      const { data: newDashboard } = await saveDashboard(
+        dissoc(dashboard, "id"),
+      );
+      if (!newDashboard) {
+        return;
+      }
 
-    setSavedDashboardId(newDashboard.id);
+      invalidateCollections();
+      dispatch(
+        addUndo({
+          message: (
+            <div className={cx(CS.flex, CS.alignCenter)}>
+              {t`Your dashboard was saved`}
+              <Link
+                className={cx(CS.link, CS.textBold, CS.ml1)}
+                to={Urls.dashboard(newDashboard)}
+              >
+                {t`See it`}
+              </Link>
+            </div>
+          ),
+          icon: "dashboard",
+        }),
+      );
+
+      setSavedDashboardId(newDashboard.id);
+    }
   };
 
   return (
