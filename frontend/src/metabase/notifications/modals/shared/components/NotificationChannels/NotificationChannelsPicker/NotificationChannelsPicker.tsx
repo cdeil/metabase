@@ -30,6 +30,8 @@ import {
   Stack,
   Text,
   Tooltip,
+  Group,
+  Button,
 } from "metabase/ui";
 import type {
   ChannelApiResponse,
@@ -41,6 +43,7 @@ import type {
 } from "metabase-types/api";
 
 import S from "./NotificationChannelsPicker.module.css";
+import { DEFAULT_TEMPLATES } from "./default_templates";
 
 export type ChannelsSupportingCustomTemplates = Extract<
   NotificationChannelKey,
@@ -624,6 +627,7 @@ export const NotificationChannelsPicker = ({
     [notificationHandlers, onChange, dispatch],
   );
 
+  console.log({ templateState });
   return (
     <Stack gap="xl" align="start" w="100%">
       {/* Email Channel */}
@@ -716,9 +720,52 @@ export const NotificationChannelsPicker = ({
                         : false
                     }
                     language="mustache"
+                    height="5rem"
                   />
                 </Stack>
               </Stack>
+              <Group gap="xs">
+                {DEFAULT_TEMPLATES &&
+                  DEFAULT_TEMPLATES?.filter(
+                    (template: (typeof DEFAULT_TEMPLATES)[number]) =>
+                      // true ||
+                      emailHandler.template
+                        ? template.body !== getTemplateValue("email", "body")
+                        : true,
+                  ).map((template: (typeof DEFAULT_TEMPLATES)[number]) => (
+                    <Tooltip
+                      key={template.name}
+                      label={template.description}
+                      withinPortal
+                    >
+                      <Button
+                        // variant="outline"
+                        color="gray"
+                        size="xs"
+                        radius="sm"
+                        onClick={() => {
+                          // handleDefaultTemplateClick(template)
+                          handleTemplateBlur("email", "body", template.body);
+                        }}
+                        onMouseEnter={() => {
+                          // console.log("Hover Enter:", template.name);
+                          if (!emailHandler.template) {
+                            dispatch({
+                              type: "UPDATE_TEMPLATE",
+                              channel: "email",
+                              field: "body",
+                              value: template.body,
+                            });
+                          }
+                        }}
+                      >
+                        <Text size="sm" fw={700}>
+                          {template.name}
+                        </Text>
+                      </Button>
+                    </Tooltip>
+                  ))}
+              </Group>
             </Stack>
           )}
         </ChannelSettingsBlock>
