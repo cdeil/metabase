@@ -75,7 +75,7 @@ export const PublicOrEmbeddedDashboardPage = (props: WithRouterProps) => {
         locale={canWhitelabel ? locale : undefined}
         withFooter={true}
         onError={(error) => {
-          dispatch(setErrorPage(error));
+          dispatch(setErrorPage(error.payload));
         }}
       />
     </>
