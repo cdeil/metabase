@@ -1,12 +1,14 @@
 /* eslint-disable react/prop-types */
+import { usePrevious } from "@mantine/hooks";
 import cx from "classnames";
 import { dissoc } from "icepick";
-import { Component } from "react";
-import type { ConnectedProps } from "react-redux";
+import { Component, useEffect, useState } from "react";
 import type { WithRouterProps } from "react-router";
 import { t } from "ttag";
 import _ from "underscore";
 
+import { dashboardApi } from "metabase/api";
+import { invalidateTags } from "metabase/api/tags";
 import ActionButton from "metabase/components/ActionButton";
 import { LoadingAndErrorWrapper } from "metabase/components/LoadingAndErrorWrapper";
 import Button from "metabase/core/components/Button";
@@ -17,81 +19,50 @@ import { DashboardGridConnected } from "metabase/dashboard/components/DashboardG
 import { DashboardTabs } from "metabase/dashboard/components/DashboardTabs";
 import { DASHBOARD_PARAMETERS_PDF_EXPORT_NODE_ID } from "metabase/dashboard/constants";
 import {
-  DashboardData,
-  type DashboardDataReturnedProps,
-} from "metabase/dashboard/hoc/DashboardData";
-import { getIsHeaderVisible, getTabs } from "metabase/dashboard/selectors";
-import Collections from "metabase/entities/collections";
-import Dashboards from "metabase/entities/dashboards";
-import title from "metabase/hoc/Title";
-import { color } from "metabase/lib/colors";
-import { connect } from "metabase/lib/redux";
+  DashboardContext,
+  DashboardContextProvider,
+} from "metabase/dashboard/context";
+import type { DashboardDataReturnedProps } from "metabase/dashboard/hoc/DashboardData";
+import { connect, useDispatch } from "metabase/lib/redux";
 import * as Urls from "metabase/lib/urls";
 import { ParametersList } from "metabase/parameters/components/ParametersList";
 import { addUndo } from "metabase/redux/undo";
-import { getMetadata } from "metabase/selectors/metadata";
 import { Box } from "metabase/ui";
 import { getValuePopulatedParameters } from "metabase-lib/v1/parameters/utils/parameter-values";
-import type { Dashboard as IDashboard } from "metabase-types/api";
-import type { State } from "metabase-types/store";
+import type {
+  Dashboard,
+  DashboardId,
+  Dashboard as IDashboard,
+} from "metabase-types/api";
+import type { Undo } from "metabase-types/store/undo";
 
 import { FixedWidthContainer } from "../../components/Dashboard/DashboardComponents";
 import { useDashboardUrlQuery } from "../../hooks/use-dashboard-url-query";
+import { DashboardTitle } from "../DashboardApp/DashboardTitle";
 import { XrayIcon } from "../XrayIcon";
 
 import S from "./AutomaticDashboardApp.module.css";
 import { SuggestionsSidebar } from "./SuggestionsSidebar";
+import { ConnectedProps } from "react-redux";
+import Dashboards from "metabase/entities/dashboards";
 
 type AutomaticDashboardAppRouterProps = WithRouterProps<{ splat: string }>;
 
-const getDashboardId = (
-  _state: State,
-  { params: { splat }, location: { hash } }: AutomaticDashboardAppRouterProps,
-) => `/auto/dashboard/${splat}${hash.replace(/^#?/, "?")}`;
+const getDashboardId = ({
+  params: { splat },
+  location: { hash },
+}: AutomaticDashboardAppRouterProps) =>
+  `/auto/dashboard/${splat}${hash.replace(/^#?/, "?")}`;
 
-const mapStateToProps = (
-  state: State,
-  props: AutomaticDashboardAppRouterProps,
-) => ({
-  metadata: getMetadata(state),
-  dashboardId: getDashboardId(state, props),
-  isHeaderVisible: getIsHeaderVisible(state),
-  tabs: getTabs(state),
-});
-
-const mapDispatchToProps = {
-  saveDashboard: Dashboards.actions.save,
-  invalidateCollections: Collections.actions.invalidateLists,
-  addUndo,
-};
-
-const connector = connect(mapStateToProps, mapDispatchToProps);
-type ReduxProps = ConnectedProps<typeof connector>;
-
-type AutomaticDashboardAppInnerProps = ReduxProps &
-  AutomaticDashboardAppRouterProps &
-  DashboardDataReturnedProps &
-  WithToasterReturned;
+type AutomaticDashboardAppInnerProps = AutomaticDashboardAppRouterProps &
+  DashboardDataReturnedProps;
 
 class AutomaticDashboardAppInner extends Component<AutomaticDashboardAppInnerProps> {
-  state = {
-    savedDashboardId: null,
-  };
-
-  componentDidUpdate(prevProps: AutomaticDashboardAppInnerProps) {
-    // scroll to the top when the pathname changes
-    if (prevProps.location.pathname !== this.props.location.pathname) {
-      window.scrollTo(0, 0);
-    }
-  }
-
   save = async () => {
-    const { dashboard, addUndo, saveDashboard, invalidateCollections } =
-      this.props;
+    const { addUndo, saveDashboard, invalidateCollections } = this.props;
+    const { dashboard } = this.context;
     // remove the transient id before trying to save
-    const { payload: newDashboard } = await saveDashboard(
-      dissoc(dashboard, "id"),
-    );
+    const { data: newDashboard } = await saveDashboard(dissoc(dashboard, "id"));
     invalidateCollections();
     addUndo({
       message: (
@@ -108,25 +79,20 @@ class AutomaticDashboardAppInner extends Component<AutomaticDashboardAppInnerPro
       icon: "dashboard",
     });
 
-    this.setState({ savedDashboardId: newDashboard.id });
+    this.props.setSavedDashboardId(newDashboard.id);
   };
-
-  UNSAFE_componentWillReceiveProps(nextProps: AutomaticDashboardAppInnerProps) {
-    // clear savedDashboardId if changing to a different dashboard
-    if (this.props.location.pathname !== nextProps.location.pathname) {
-      this.setState({ savedDashboardId: null });
-    }
-  }
-
   render() {
+    const { savedDashboardId } = this.props;
     const {
       dashboard,
+      tabs,
       parameters,
       parameterValues,
       setParameterValue,
+      slowCards,
+      selectedTabId,
       isHeaderVisible,
-    } = this.props;
-    const { savedDashboardId } = this.state;
+    } = this.context;
     // pull out "more" related items for displaying as a button at the bottom of the dashboard
     const more = dashboard && dashboard.more;
     const related = dashboard && dashboard.related;
@@ -139,10 +105,6 @@ class AutomaticDashboardAppInner extends Component<AutomaticDashboardAppInnerPro
           "AutomaticDashboard--withSidebar": hasSidebar,
         })}
       >
-        <AutomaticDashboardQueryParamsSync
-          router={this.props.router}
-          location={this.props.location}
-        />
         <div className="" style={{ marginRight: hasSidebar ? 346 : undefined }}>
           {isHeaderVisible && (
             <div
@@ -174,7 +136,7 @@ class AutomaticDashboardAppInner extends Component<AutomaticDashboardAppInnerPro
                       </ActionButton>
                     )}
                   </div>
-                  {dashboard && this.props.tabs.length > 1 && (
+                  {dashboard && tabs && tabs.length > 1 && (
                     <div className={cx(CS.wrapper, CS.flex, CS.alignCenter)}>
                       <DashboardTabs dashboardId={dashboard.id} />
                     </div>
@@ -205,16 +167,16 @@ class AutomaticDashboardAppInner extends Component<AutomaticDashboardAppInnerPro
             )}
             <LoadingAndErrorWrapper
               className={cx(DashboardS.Dashboard, CS.p1, CS.flexFull)}
-              loading={!this.props.dashboard}
+              loading={!dashboard}
               noBackground
             >
               {() =>
-                this.props.dashboard && (
+                dashboard && (
                   <DashboardGridConnected
                     isXray
-                    dashboard={this.props.dashboard}
-                    slowCards={this.props.slowCards}
-                    selectedTabId={this.props.selectedTabId}
+                    dashboard={dashboard}
+                    slowCards={slowCards}
+                    selectedTabId={selectedTabId}
                     isEditing={false}
                     isEditingParameter={false}
                     clickBehaviorSidebarDashcard={null}
@@ -252,13 +214,52 @@ class AutomaticDashboardAppInner extends Component<AutomaticDashboardAppInnerPro
   }
 }
 
-export const AutomaticDashboardAppConnected = _.compose(
-  connector,
-  DashboardData,
-  title(
-    ({ dashboard }: { dashboard: IDashboard }) => dashboard && dashboard.name,
-  ),
-)(AutomaticDashboardAppInner);
+AutomaticDashboardAppInner.contextType = DashboardContext;
+
+export const AutomaticDashboardAppRouterView = (
+  props: AutomaticDashboardAppRouterProps,
+) => {
+  const dispatch = useDispatch();
+
+  const dashboardId = getDashboardId(props);
+
+  const [savedDashboardId, setSavedDashboardId] = useState<DashboardId | null>(
+    null,
+  );
+
+  const saveDashboard = (dashboard: Omit<Dashboard, "id">) =>
+    dispatch(dashboardApi.endpoints.saveDashboard.initiate(dashboard));
+
+  const invalidateCollections = () => invalidateTags(null, ["collection"]);
+
+  const previousPathname = usePrevious(props.location.pathname);
+
+  useEffect(() => {
+    if (props.location.pathname !== previousPathname) {
+      setSavedDashboardId(null);
+
+      window.scrollTo(0, 0);
+    }
+  }, [props.location.pathname, previousPathname, dashboardId]);
+  useDashboardUrlQuery(props.router, props.location);
+
+  return (
+    <DashboardContextProvider dashboardId={dashboardId}>
+      <DashboardTitle />
+      <AutomaticDashboardAppInner
+        addUndo={(props) => dispatch(addUndo(props))}
+        saveDashboard={saveDashboard}
+        invalidateCollections={invalidateCollections}
+        savedDashboardId={savedDashboardId}
+        setSavedDashboardId={setSavedDashboardId}
+      />
+    </DashboardContextProvider>
+  );
+};
+
+export const AutomaticDashboardAppConnected = _.compose()(
+  AutomaticDashboardAppRouterView,
+);
 
 const TransientTitle = ({ dashboard }: { dashboard: IDashboard }) =>
   dashboard.transient_name ? (
@@ -266,13 +267,3 @@ const TransientTitle = ({ dashboard }: { dashboard: IDashboard }) =>
   ) : dashboard.name ? (
     <span>{dashboard.name}</span>
   ) : null;
-
-// Workaround until AutomaticDashboardApp is refactored to be a function component
-// (or even better, merged/generalized with DashboardApp)
-const AutomaticDashboardQueryParamsSync = ({
-  router,
-  location,
-}: Pick<WithRouterProps, "router" | "location">) => {
-  useDashboardUrlQuery(router, location);
-  return null;
-};

@@ -59,7 +59,9 @@ type ContextReturned = OwnResult &
   Required<DashboardControls> &
   DashboardLoadingState;
 
-const DashboardContext = createContext<ContextReturned | undefined>(undefined);
+export const DashboardContext = createContext<ContextReturned | undefined>(
+  undefined,
+);
 
 const DashboardContextProviderInner = ({
   dashboardId,
@@ -98,6 +100,7 @@ const DashboardContextProviderInner = ({
   isEditing,
   isNavigatingBackToDashboard,
   parameterValues,
+  tabs,
 
   // redux actions
   addCardToDashboard,

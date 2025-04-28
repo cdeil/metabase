@@ -67,6 +67,7 @@ import {
   getSelectedTabId,
   getSidebar,
   getSlowCards,
+  getTabs,
 } from "../selectors";
 
 const mapStateToProps = (state: State) => ({
@@ -81,6 +82,7 @@ const mapStateToProps = (state: State) => ({
   dashboard: getDashboardComplete(state),
   slowCards: getSlowCards(state),
   parameterValues: getParameterValues(state),
+  tabs: getTabs(state),
   loadingStartTime: getLoadingStartTime(state),
   clickBehaviorSidebarDashcard: getClickBehaviorSidebarDashcard(state),
   isAddParameterPopoverOpen: getIsAddParameterPopoverOpen(state),
