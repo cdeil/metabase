@@ -8,12 +8,14 @@ import { t } from "ttag";
 import _ from "underscore";
 
 import ActionButton from "metabase/components/ActionButton";
+import { LoadingAndErrorWrapper } from "metabase/components/LoadingAndErrorWrapper";
 import Button from "metabase/core/components/Button";
 import Link from "metabase/core/components/Link";
 import CS from "metabase/css/core/index.css";
+import DashboardS from "metabase/css/dashboard.module.css";
+import { DashboardGridConnected } from "metabase/dashboard/components/DashboardGrid";
 import { DashboardTabs } from "metabase/dashboard/components/DashboardTabs";
 import { DASHBOARD_PARAMETERS_PDF_EXPORT_NODE_ID } from "metabase/dashboard/constants";
-import { Dashboard } from "metabase/dashboard/containers/Dashboard";
 import {
   DashboardData,
   type DashboardDataReturnedProps,
@@ -201,20 +203,28 @@ class AutomaticDashboardAppInner extends Component<AutomaticDashboardAppInnerPro
                 </FixedWidthContainer>
               </div>
             )}
-            {this.props.dashboard && (
-              <Dashboard
-                isXray
-                dashboard={this.props.dashboard}
-                slowCards={this.props.slowCards}
-                selectedTabId={this.props.selectedTabId}
-                isEditing={false}
-                isEditingParameter={false}
-                clickBehaviorSidebarDashcard={null}
-                downloadsEnabled={false}
-                autoScrollToDashcardId={undefined}
-                reportAutoScrolledToDashcard={_.noop}
-              />
-            )}
+            <LoadingAndErrorWrapper
+              className={cx(DashboardS.Dashboard, CS.p1, CS.flexFull)}
+              loading={!this.props.dashboard}
+              noBackground
+            >
+              {() =>
+                this.props.dashboard && (
+                  <DashboardGridConnected
+                    isXray
+                    dashboard={this.props.dashboard}
+                    slowCards={this.props.slowCards}
+                    selectedTabId={this.props.selectedTabId}
+                    isEditing={false}
+                    isEditingParameter={false}
+                    clickBehaviorSidebarDashcard={null}
+                    downloadsEnabled={false}
+                    autoScrollToDashcardId={undefined}
+                    reportAutoScrolledToDashcard={_.noop}
+                  />
+                )
+              }
+            </LoadingAndErrorWrapper>
           </div>
           {more && (
             <div className={cx(CS.flex, CS.justifyEnd, CS.px4, CS.pb4)}>
